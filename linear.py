@@ -10,7 +10,7 @@ from torchvision.datasets import CIFAR10
 from tqdm import tqdm
 
 import utils
-from model import Model
+from model import Model, Model_mobilenetv3
 
 
 class Net(nn.Module):
@@ -29,6 +29,21 @@ class Net(nn.Module):
         out = self.fc(feature)
         return out
 
+class NetMobilenetv3(nn.Module):
+    def __init__(self, num_class, pretrained_path):
+        super(NetMobilenetv3, self).__init__()
+
+        # encoder
+        self.f = Model_mobilenetv3().f
+        # classifier
+        self.fc = nn.Linear(576, num_class, bias=True)
+        self.load_state_dict(torch.load(pretrained_path, map_location='cpu'), strict=False)
+
+    def forward(self, x):
+        x = self.f(x)
+        feature = torch.flatten(x, start_dim=1)
+        out = self.fc(feature)
+        return out
 
 # train or test for one epoch
 def train_val(net, data_loader, train_optimizer):
@@ -74,7 +89,12 @@ if __name__ == '__main__':
     test_data = CIFAR10(root='data', train=False, transform=utils.test_transform, download=True)
     test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=False, num_workers=16, pin_memory=True)
 
-    model = Net(num_class=len(train_data.classes), pretrained_path=model_path).cuda()
+
+
+    model = NetMobilenetv3(num_class=len(train_data.classes), pretrained_path=model_path).cuda()
+
+
+    # model = Net(num_class=len(train_data.classes), pretrained_path=model_path).cuda()
     for param in model.f.parameters():
         param.requires_grad = False
 
