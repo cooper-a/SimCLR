@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 import utils
-from model import Model, Model_mobilenetv3_small
+from model import Model, Model_mobilenetv3_small, Model_mobilenetv3_large
 
 
 # train for one epoch to learn unique features
@@ -112,7 +112,7 @@ if __name__ == '__main__':
 
     # model setup and optimizer config
     # model = Model(feature_dim).cuda()
-    model = Model_mobilenetv3_small(feature_dim).cuda()
+    model = Model_mobilenetv3_large(feature_dim).cuda()
     flops, params = profile(model, inputs=(torch.randn(1, 3, 32, 32).cuda(),))
     flops, params = clever_format([flops, params])
     print('# Model Params: {} FLOPs: {}'.format(params, flops))
@@ -128,12 +128,13 @@ if __name__ == '__main__':
     for epoch in range(1, epochs + 1):
         train_loss = train(model, train_loader, optimizer)
         results['train_loss'].append(train_loss)
-        test_acc_1, test_acc_5 = test(model, memory_loader, test_loader)
-        results['test_acc@1'].append(test_acc_1)
-        results['test_acc@5'].append(test_acc_5)
-        # save statistics
-        data_frame = pd.DataFrame(data=results, index=range(1, epoch + 1))
-        data_frame.to_csv('results/{}_statistics.csv'.format(save_name_pre), index_label='epoch')
-        if test_acc_1 > best_acc:
-            best_acc = test_acc_1
-            torch.save(model.state_dict(), 'results/{}_model.pth'.format(save_name_pre))
+        if epoch % 20 == 0:
+            test_acc_1, test_acc_5 = test(model, memory_loader, test_loader)
+            results['test_acc@1'].append(test_acc_1)
+            results['test_acc@5'].append(test_acc_5)
+            # save statistics
+            data_frame = pd.DataFrame(data=results, index=range(1, int(epoch / 20) + 1))
+            data_frame.to_csv('results/{}_statistics.csv'.format(save_name_pre), index_label='epoch')
+            if test_acc_1 > best_acc:
+                best_acc = test_acc_1
+                torch.save(model.state_dict(), 'results/{}_model.pth'.format(save_name_pre))

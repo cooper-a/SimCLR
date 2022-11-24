@@ -64,7 +64,7 @@ class Model_mobilenetv3_large(nn.Module):
         self.f = nn.Sequential(*self.f)
         # projection head
         self.g = nn.Sequential(
-                nn.Linear(576, 1024),
+                nn.Linear(960, 1024),
                 nn.Hardswish(),
                 nn.Dropout(0.2, inplace=True),
                 nn.Linear(1024, feature_dim)
