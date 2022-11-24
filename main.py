@@ -128,9 +128,9 @@ if __name__ == '__main__':
     for epoch in range(1, epochs + 1):
         train_loss = train(model, train_loader, optimizer)
         results['train_loss'].append(train_loss)
-        if epoch % 2 == 0:
+        if epoch % 20 == 0:
             test_acc_1, test_acc_5 = test(model, memory_loader, test_loader)
-            for i in range(2):
+            for i in range(20):
                 results['test_acc@1'].append(test_acc_1)
                 results['test_acc@5'].append(test_acc_5)
             # save statistics
