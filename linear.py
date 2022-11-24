@@ -10,7 +10,7 @@ from torchvision.datasets import CIFAR10
 from tqdm import tqdm
 
 import utils
-from model import Model, Model_mobilenetv3
+from model import Model, Model_mobilenetv3_small, Model_mobilenetv3_large
 
 
 class Net(nn.Module):
@@ -29,12 +29,14 @@ class Net(nn.Module):
         out = self.fc(feature)
         return out
 
+
 class NetMobilenetv3(nn.Module):
     def __init__(self, num_class, pretrained_path):
         super(NetMobilenetv3, self).__init__()
 
         # encoder
-        self.f = Model_mobilenetv3().f
+        # self.f = Model_mobilenetv3_small().f
+        self.f = Model_mobilenetv3_large().f
         # classifier
         self.fc = nn.Linear(576, num_class, bias=True)
         self.load_state_dict(torch.load(pretrained_path, map_location='cpu'), strict=False)

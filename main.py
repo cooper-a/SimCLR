@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 import utils
-from model import Model
+from model import Model, Model_mobilenetv3_small
 
 
 # train for one epoch to learn unique features
@@ -101,7 +101,7 @@ if __name__ == '__main__':
     feature_dim, temperature, k = args.feature_dim, args.temperature, args.k
     batch_size, epochs = args.batch_size, args.epochs
 
-    # data prepare
+    #data prepare
     train_data = utils.CIFAR10Pair(root='data', train=True, transform=utils.train_transform, download=True)
     train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True, num_workers=16, pin_memory=True,
                               drop_last=True)
@@ -110,10 +110,9 @@ if __name__ == '__main__':
     test_data = utils.CIFAR10Pair(root='data', train=False, transform=utils.test_transform, download=True)
     test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=False, num_workers=16, pin_memory=True)
 
-
-
     # model setup and optimizer config
-    model = Model(feature_dim).cuda()
+    # model = Model(feature_dim).cuda()
+    model = Model_mobilenetv3_small(feature_dim).cuda()
     flops, params = profile(model, inputs=(torch.randn(1, 3, 32, 32).cuda(),))
     flops, params = clever_format([flops, params])
     print('# Model Params: {} FLOPs: {}'.format(params, flops))

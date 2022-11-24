@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torchvision.models.resnet import resnet50
-from torchvision.models.mobilenetv3 import mobilenet_v3_small
+from torchvision.models.mobilenetv3 import mobilenet_v3_small, mobilenet_v3_large
 
 
 class Model(nn.Module):
@@ -27,16 +27,39 @@ class Model(nn.Module):
         out = self.g(feature)
         return F.normalize(feature, dim=-1), F.normalize(out, dim=-1)
 
-class Model_mobilenetv3(nn.Module):
+
+class Model_mobilenetv3_small(nn.Module):
     def __init__(self, feature_dim=128):
-        super(Model_mobilenetv3, self).__init__()
+        super(Model_mobilenetv3_small, self).__init__()
 
         self.f = []
         for name, module in mobilenet_v3_small().named_children():
             if name != 'classifier':
                 self.f.append(module)
-            else:
-                print(module)
+        # encoder
+        self.f = nn.Sequential(*self.f)
+        # projection head
+        self.g = nn.Sequential(
+                nn.Linear(576, 1024),
+                nn.Hardswish(),
+                nn.Dropout(0.2, inplace=True),
+                nn.Linear(1024, feature_dim)
+            )
+
+    def forward(self, x):
+        x = self.f(x)
+        feature = torch.flatten(x, start_dim=1)
+        out = self.g(feature)
+        return F.normalize(feature, dim=-1), F.normalize(out, dim=-1)
+
+class Model_mobilenetv3_large(nn.Module):
+    def __init__(self, feature_dim=128):
+        super(Model_mobilenetv3_large, self).__init__()
+
+        self.f = []
+        for name, module in mobilenet_v3_large().named_children():
+            if name != 'classifier':
+                self.f.append(module)
         # encoder
         self.f = nn.Sequential(*self.f)
         # projection head
