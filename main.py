@@ -111,8 +111,13 @@ if __name__ == '__main__':
     test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=False, num_workers=16, pin_memory=True)
 
     # model setup and optimizer config
-    # model = Model(feature_dim).cuda()
-    model = Model_mobilenetv3_large(feature_dim).cuda()
+    model = Model(feature_dim).cuda()
+
+    # MobileNetV3 Large
+    # model = Model_mobilenetv3_large(feature_dim).cuda()
+
+    # MobileNetV3 Small
+    # model = Model_mobilenetv3_small(feature_dim).cuda()
     flops, params = profile(model, inputs=(torch.randn(1, 3, 32, 32).cuda(),))
     flops, params = clever_format([flops, params])
     print('# Model Params: {} FLOPs: {}'.format(params, flops))
