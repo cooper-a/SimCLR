@@ -38,7 +38,7 @@ class NetMobilenetv3(nn.Module):
         # self.f = Model_mobilenetv3_small().f
         self.f = Model_mobilenetv3_large().f
         # classifier
-        self.fc = nn.Linear(576, num_class, bias=True)
+        self.fc = nn.Linear(960, num_class, bias=True)
         self.load_state_dict(torch.load(pretrained_path, map_location='cpu'), strict=False)
 
     def forward(self, x):
@@ -92,9 +92,8 @@ if __name__ == '__main__':
     test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=False, num_workers=16, pin_memory=True)
 
 
-
+    # Large
     model = NetMobilenetv3(num_class=len(train_data.classes), pretrained_path=model_path).cuda()
-
 
     # model = Net(num_class=len(train_data.classes), pretrained_path=model_path).cuda()
     for param in model.f.parameters():

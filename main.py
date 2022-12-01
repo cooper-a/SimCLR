@@ -111,7 +111,7 @@ if __name__ == '__main__':
     test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=False, num_workers=16, pin_memory=True)
 
     # model setup and optimizer config
-    model = Model(feature_dim).cuda()
+    # model = Model(feature_dim).cuda()
 
     # MobileNetV3 Large
     # model = Model_mobilenetv3_large(feature_dim).cuda()
@@ -133,6 +133,7 @@ if __name__ == '__main__':
     for epoch in range(1, epochs + 1):
         train_loss = train(model, train_loader, optimizer)
         results['train_loss'].append(train_loss)
+        # Test model only every 20 epochs to save compute time
         if epoch % 20 == 0:
             test_acc_1, test_acc_5 = test(model, memory_loader, test_loader)
             for i in range(20):
