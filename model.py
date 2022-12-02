@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torchvision.models.resnet import resnet50, resnet18
+from torchvision.models.resnet import resnet18
 from torchvision.models.mobilenetv3 import mobilenet_v3_small, mobilenet_v3_large
 
 

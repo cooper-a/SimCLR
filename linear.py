@@ -30,15 +30,30 @@ class Net(nn.Module):
         return out
 
 
-class NetMobilenetv3(nn.Module):
+class NetMobilenetv3_small(nn.Module):
     def __init__(self, num_class, pretrained_path):
-        super(NetMobilenetv3, self).__init__()
+        super(NetMobilenetv3_small, self).__init__()
 
         # encoder
         self.f = Model_mobilenetv3_small().f
-        #self.f = Model_mobilenetv3_large().f
         # classifier
         self.fc = nn.Linear(576, num_class, bias=True)
+        self.load_state_dict(torch.load(pretrained_path, map_location='cpu'), strict=False)
+
+    def forward(self, x):
+        x = self.f(x)
+        feature = torch.flatten(x, start_dim=1)
+        out = self.fc(feature)
+        return out
+
+class NetMobilenetv3_large(nn.Module):
+    def __init__(self, num_class, pretrained_path):
+        super(NetMobilenetv3_large, self).__init__()
+
+        # encoder
+        self.f = Model_mobilenetv3_large().f
+        # classifier
+        self.fc = nn.Linear(960, num_class, bias=True)
         self.load_state_dict(torch.load(pretrained_path, map_location='cpu'), strict=False)
 
     def forward(self, x):
@@ -79,23 +94,26 @@ def train_val(net, data_loader, train_optimizer):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Linear Evaluation')
-    parser.add_argument('--model_path', type=str, default='results/128_0.5_200_512_500_model.pth',
+    parser.add_argument('--model_path', type=str, default='final_results/mobilenetv3small_1024_batch_1000_epoch/128_0.5_200_1024_1000_model.pth',
                         help='The pretrained model path')
     parser.add_argument('--batch_size', type=int, default=512, help='Number of images in each mini-batch')
     parser.add_argument('--epochs', type=int, default=100, help='Number of sweeps over the dataset to train')
+    parser.add_argument('--model_base', type=str, default='mobilenetv3_small', help='The base model')
 
     args = parser.parse_args()
-    model_path, batch_size, epochs = args.model_path, args.batch_size, args.epochs
+    model_path, batch_size, epochs, model_base = args.model_path, args.batch_size, args.epochs, args.model_base
     train_data = CIFAR10(root='data', train=True, transform=utils.train_transform, download=True)
     train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True, num_workers=16, pin_memory=True)
     test_data = CIFAR10(root='data', train=False, transform=utils.test_transform, download=True)
     test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=False, num_workers=16, pin_memory=True)
 
+    if model_base == "mobilenetv3_small":
+        model = NetMobilenetv3_small(num_class=len(train_data.classes), pretrained_path=model_path).cuda()
+    elif model_base == "mobilenetv3_large":
+        model = NetMobilenetv3_large(num_class=len(train_data.classes), pretrained_path=model_path).cuda()
+    elif model_base == "resnet18":
+        model = Net(num_class=len(train_data.classes), pretrained_path=model_path).cuda()
 
-    # Large
-    # model = NetMobilenetv3(num_class=len(train_data.classes), pretrained_path=model_path).cuda()
-    # model = NetMobilenetv3(num_class=len(train_data.classes), pretrained_path=model_path).cuda()
-    model = Net(num_class=len(train_data.classes), pretrained_path=model_path).cuda()
     for param in model.f.parameters():
         param.requires_grad = False
 

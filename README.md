@@ -29,7 +29,7 @@ This repository contains the code for the final project of SYDE 572. The goal of
 ## Usage
 ### Train SimCLR
 ```
-python main.py --batch_size 1024 --epochs 1000 
+python main.py
 optional arguments:
 --feature_dim                 Feature dim for latent vector [default value is 128]
 --temperature                 Temperature used in softmax [default value is 0.5]
@@ -41,7 +41,7 @@ optional arguments:
 
 ### Linear Evaluation
 ```
-python linear.py --batch_size 1024 --epochs 200 
+python linear.py
 optional arguments:
 --model_path                  The pretrained model path [default value is 'results/128_0.5_200_512_500_model.pth']
 --batch_size                  Number of images in each mini-batch [default value is 512]
@@ -56,7 +56,7 @@ Details are in the `Generate Plots.ipynb` notebook
 
 ## Results
 Detailed results can be found in `final_results` directory.
-Nested inside the directory corresponds to different model candidates with self-explanatory titles.
+Nested inside the directory corresponds to different model candidates with self-explanatory titles corresponding to the base model architecture and the hyperparameters used in the training.
 
 
 ## Attribution
