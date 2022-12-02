@@ -20,7 +20,7 @@ class Net(nn.Module):
         # encoder
         self.f = Model().f
         # classifier
-        self.fc = nn.Linear(2048, num_class, bias=True)
+        self.fc = nn.Linear(512, num_class, bias=True)
         self.load_state_dict(torch.load(pretrained_path, map_location='cpu'), strict=False)
 
     def forward(self, x):
@@ -35,10 +35,10 @@ class NetMobilenetv3(nn.Module):
         super(NetMobilenetv3, self).__init__()
 
         # encoder
-        # self.f = Model_mobilenetv3_small().f
-        self.f = Model_mobilenetv3_large().f
+        self.f = Model_mobilenetv3_small().f
+        #self.f = Model_mobilenetv3_large().f
         # classifier
-        self.fc = nn.Linear(960, num_class, bias=True)
+        self.fc = nn.Linear(576, num_class, bias=True)
         self.load_state_dict(torch.load(pretrained_path, map_location='cpu'), strict=False)
 
     def forward(self, x):
@@ -93,9 +93,9 @@ if __name__ == '__main__':
 
 
     # Large
-    model = NetMobilenetv3(num_class=len(train_data.classes), pretrained_path=model_path).cuda()
-
-    # model = Net(num_class=len(train_data.classes), pretrained_path=model_path).cuda()
+    # model = NetMobilenetv3(num_class=len(train_data.classes), pretrained_path=model_path).cuda()
+    # model = NetMobilenetv3(num_class=len(train_data.classes), pretrained_path=model_path).cuda()
+    model = Net(num_class=len(train_data.classes), pretrained_path=model_path).cuda()
     for param in model.f.parameters():
         param.requires_grad = False
 

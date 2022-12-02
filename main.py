@@ -95,11 +95,13 @@ if __name__ == '__main__':
     parser.add_argument('--k', default=200, type=int, help='Top k most similar images used to predict the label')
     parser.add_argument('--batch_size', default=512, type=int, help='Number of images in each mini-batch')
     parser.add_argument('--epochs', default=500, type=int, help='Number of sweeps over the dataset to train')
+    parser.add_argument('--model_base', default="mobilenetv3_small", type=str, help='The base CNN model architecture')
 
     # args parse
     args = parser.parse_args()
     feature_dim, temperature, k = args.feature_dim, args.temperature, args.k
     batch_size, epochs = args.batch_size, args.epochs
+    model_base = args.model_base
 
     #data prepare
     train_data = utils.CIFAR10Pair(root='data', train=True, transform=utils.train_transform, download=True)
@@ -110,14 +112,16 @@ if __name__ == '__main__':
     test_data = utils.CIFAR10Pair(root='data', train=False, transform=utils.test_transform, download=True)
     test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=False, num_workers=16, pin_memory=True)
 
-    # model setup and optimizer config
-    # model = Model(feature_dim).cuda()
-
-    # MobileNetV3 Large
-    # model = Model_mobilenetv3_large(feature_dim).cuda()
-
     # MobileNetV3 Small
-    # model = Model_mobilenetv3_small(feature_dim).cuda()
+    if model_base == "mobilenetv3_small":
+        model = Model_mobilenetv3_small(feature_dim).cuda()
+    # MobileNetV3 Large
+    elif model_base == "mobilenetv3_large":
+        model = Model_mobilenetv3_large(feature_dim).cuda()
+    # ResNet18
+    elif model_base == "resnet18":
+        model = Model(feature_dim).cuda()
+
     flops, params = profile(model, inputs=(torch.randn(1, 3, 32, 32).cuda(),))
     flops, params = clever_format([flops, params])
     print('# Model Params: {} FLOPs: {}'.format(params, flops))
